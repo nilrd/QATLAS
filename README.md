@@ -1,8 +1,8 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="/logo_qatlas_dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="/logo_qatlas.png">
-    <img alt="QAtlas Logo" src="/logo_qatlas.png" width="400">
+    <source media="(prefers-color-scheme: dark)" srcset="./public/logo_qatlas_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="./public/logo_qatlas.png">
+    <img alt="QAtlas Logo" src="./public/logo_qatlas.png" width="400">
   </picture>
   
   # QAtlas — Seu Atlas Digital de Qualidade
