@@ -36,7 +36,8 @@ try {
 // also try idempotent chmod for common package bins
 const commonBins = [
   path.join(projRoot, 'node_modules', 'typescript', 'bin', 'tsc'),
-  path.join(projRoot, 'node_modules', 'vite', 'bin', 'vite.js')
+  path.join(projRoot, 'node_modules', 'vite', 'bin', 'vite.js'),
+  path.join(projRoot, 'node_modules', '.bin', 'vite') // Added Vite binary
 ]
 commonBins.forEach(p => safeChmod(p))
 
