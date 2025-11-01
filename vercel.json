@@ -1,5 +1,6 @@
 {
   "framework": "vite",
+  "installCommand": "npm install --unsafe-perm --no-audit --no-fund",
   "buildCommand": "vite build",
   "devCommand": "vite dev",
   "outputDirectory": "dist"
