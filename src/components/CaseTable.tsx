@@ -65,6 +65,20 @@ function PassosEditor({ case: c, updateCase, lang }: { case: QACase; updateCase:
   )
 }
 
+function GherkinEditor({ case: c, updateCase, lang }: { case: QACase; updateCase: (id: string, patch: Partial<QACase>) => void; lang: string }){
+  const value = (c.passos || []).join('\n')
+  return (
+    <textarea
+      className="gherkin-editor"
+      rows={3}
+      placeholder={`Given precondição\nWhen ação\nThen resultado`}
+      value={value}
+      onChange={e=> updateCase(c.id, { passos: e.target.value.split(/\r?\n/) })}
+      style={{minWidth:240}}
+    />
+  )
+}
+
 export function CaseTable(){
   const { cases, updateCase, removeCase, setStatus, toggleExecuted, toggleImpedido, addCase, lang } = useStore(s=>({
     cases: (window as any).__QATLAS_FILTERED__ ?? s.data.cases,
@@ -77,18 +91,27 @@ export function CaseTable(){
     lang: s.data.meta.lang
   }))
 
+  const [reasonFor, setReasonFor] = useState<string|null>(null)
+  const [reasonText, setReasonText] = useState('')
+  const [reasonSource, setReasonSource] = useState<null|'checkbox'|'status'>(null)
+  const [pendingStatus, setPendingStatus] = useState<{id:string, prev: Status} | null>(null)
+  const [alertDialog, setAlertDialog] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+
   function handleStatusChange(id: string, status: Status){
     const c = cases.find(x => x.id === id)!
     // Validações
     if(status === 'FALHOU' && !c.resultadoReal.trim()){
-      alert(t(lang, 'validationFailedNoResult'))
-      return
-    }
-    if(status === 'IMPEDIDO' && !c.motivo.trim()){
-      alert(t(lang, 'validationImpededNoReason'))
+      setAlertDialog(t(lang, 'validationFailedNoResult'))
       return
     }
     setStatus(id, status)
+    if(status === 'IMPEDIDO' && !c.motivo.trim()){
+      setPendingStatus({ id, prev: c.status })
+      setReasonSource('status')
+      setReasonFor(id)
+      setReasonText('')
+    }
   }
 
   function handleModoChange(id: string, modo: 'StepByStep'|'Gherkin'){
@@ -137,10 +160,24 @@ export function CaseTable(){
     setResizing(null);
   }
 
+  function autoSizeColumn(colIndex: number){
+    try{
+      const th = document.querySelector(`.qa-table thead th:nth-child(${colIndex+1})`) as HTMLTableHeaderCellElement | null
+      if(!th) return
+      const tds = Array.from(document.querySelectorAll(`.qa-table tbody tr td:nth-child(${colIndex+1})`)) as HTMLTableCellElement[]
+      let max = th.scrollWidth
+      for(const td of tds){
+        const el = (td.querySelector('input,select,textarea,div,span,b') as HTMLElement) || td
+        if(el){ max = Math.max(max, el.scrollWidth) }
+      }
+      th.style.width = `${Math.min(Math.max(80, max + 32), 600)}px`
+    }catch{}
+  }
+
   return (
-    <div>
-      <div 
-        style={{overflowX:'auto'}} 
+    <div className="table-card">
+      <div
+        className="table-wrap"
         onMouseMove={handleColumnResize}
         onMouseUp={handleColumnResizeEnd}
         onMouseLeave={handleColumnResizeEnd}
@@ -150,18 +187,21 @@ export function CaseTable(){
             <tr>
               <th 
                 onMouseDown={(e) => handleColumnResizeStart(e, 0)}
+                onDoubleClick={()=> autoSizeColumn(0)}
                 style={{width: '80px'}}
               >
                 {t(lang,'caseNumber')}
               </th>
               <th 
                 onMouseDown={(e) => handleColumnResizeStart(e, 1)}
+                onDoubleClick={()=> autoSizeColumn(1)}
                 style={{width: '200px'}}
               >
                 {t(lang,'case')}
               </th>
               <th 
                 onMouseDown={(e) => handleColumnResizeStart(e, 2)}
+                onDoubleClick={()=> autoSizeColumn(2)}
                 style={{width: '120px'}}
               >{t(lang,'mode')}</th>
               <th>{t(lang,'testType')}</th>
@@ -171,8 +211,6 @@ export function CaseTable(){
               <th>{t(lang,'actual')}</th>
               <th>{t(lang,'status')}</th>
               <th>{t(lang,'executed')}</th>
-              <th>{t(lang,'impeded')}</th>
-              <th>{t(lang,'reason')}</th>
               <th>{t(lang,'automationReady')}</th>
               <th>{t(lang,'responsible')}</th>
               <th>{t(lang,'updatedAt')}</th>
@@ -182,8 +220,8 @@ export function CaseTable(){
           <tbody>
             {cases.map(c=> (
               <tr key={c.id}>
-                <td><b>{c.id}</b></td>
-                <td><input value={c.titulo} onChange={e=> updateCase(c.id,{ titulo: e.target.value })} placeholder={t(lang,'placeholderCase')}/></td>
+                <td><b title={c.id}>{c.id}</b></td>
+                <td><input value={c.titulo} onChange={e=> updateCase(c.id,{ titulo: e.target.value })} placeholder={t(lang,'placeholderCase')} title={c.titulo}/></td>
                 <td>
                   <select value={c.modo} onChange={e=> handleModoChange(c.id, e.target.value as any)} style={{minWidth:110}}>
                     <option value="StepByStep">{t(lang,'stepByStep')}</option>
@@ -196,6 +234,7 @@ export function CaseTable(){
                     onChange={e=> updateCase(c.id,{ tipoTeste: e.target.value })} 
                     placeholder={t(lang,'placeholderTestType')}
                     list={`tipo-${c.id}`}
+                    title={c.tipoTeste}
                   />
                   <datalist id={`tipo-${c.id}`}>
                     <option value="Funcional"/>
@@ -212,9 +251,23 @@ export function CaseTable(){
                     <option value="Negativo">{t(lang,'negative')}</option>
                   </select>
                 </td>
-                <td><PassosEditor case={c} updateCase={updateCase} lang={lang} /></td>
-                <td><input value={c.resultadoEsperado} onChange={e=> updateCase(c.id,{ resultadoEsperado: e.target.value })}/></td>
-                <td><input value={c.resultadoReal} onChange={e=> updateCase(c.id,{ resultadoReal: e.target.value })}/></td>
+                <td>{c.modo==='Gherkin' ? <GherkinEditor case={c} updateCase={updateCase} lang={lang} /> : <PassosEditor case={c} updateCase={updateCase} lang={lang} />}</td>
+                <td>
+                  <input 
+                    value={c.resultadoEsperado} 
+                    onChange={e=> updateCase(c.id,{ resultadoEsperado: e.target.value })} 
+                    placeholder={t(lang,'expected')}
+                    title={c.resultadoEsperado}
+                  />
+                </td>
+                <td>
+                  <input 
+                    value={c.resultadoReal} 
+                    onChange={e=> updateCase(c.id,{ resultadoReal: e.target.value })} 
+                    placeholder={t(lang,'actual')}
+                    title={c.resultadoReal}
+                  />
+                </td>
                 <td>
                   <select value={c.status} onChange={e=> handleStatusChange(c.id, e.target.value as Status)}>
                     <option value="PASSOU">{t(lang,'passou')}</option>
@@ -223,22 +276,20 @@ export function CaseTable(){
                     <option value="NAO_EXECUTADO">{t(lang,'naoExecutado')}</option>
                   </select>
                   <div style={{marginTop:6}}><StatusChip s={c.status} lang={lang}/></div>
+                  {c.status==='IMPEDIDO' && (c.motivo||'').trim() && (
+                    <div className="reason-badge" title={t(lang,'reason')} style={{marginTop:6, display:'inline-flex', alignItems:'center', gap:6}}>
+                      <span style={{maxWidth:280, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{c.motivo}</span>
+                      <button 
+                        className="chip-close" 
+                        title={t(lang,'cancel')}
+                        onClick={()=> { updateCase(c.id,{ motivo:'' }); setStatus(c.id,'NAO_EXECUTADO') }}
+                        aria-label="Remover motivo"
+                      >×</button>
+                    </div>
+                  )}
                 </td>
                 <td><input type="checkbox" checked={c.executado} onChange={()=> toggleExecuted(c.id)} /></td>
-                <td>
-                  <input 
-                    type="checkbox" 
-                    checked={c.impedido} 
-                    onChange={()=> {
-                      if(!c.impedido && !c.motivo.trim()){
-                        alert(t(lang,'validationImpededBeforeReason'))
-                        return
-                      }
-                      toggleImpedido(c.id)
-                    }} 
-                  />
-                </td>
-                <td><input value={c.motivo} onChange={e=> updateCase(c.id,{ motivo: e.target.value })} placeholder={t(lang,'placeholderReason')}/></td>
+                {/* coluna 'motivo' removida (motivo agora é solicitado via modal quando necessário) */}
                 <td>
                   <input 
                     type="checkbox" 
@@ -248,16 +299,12 @@ export function CaseTable(){
                     title={c.modo !== 'Gherkin' ? t(lang,'validationAutomationOnlyGherkin') : ''}
                   />
                 </td>
-                <td><input value={c.responsavel} onChange={e=> updateCase(c.id,{ responsavel: e.target.value })}/></td>
+                <td><input value={c.responsavel} onChange={e=> updateCase(c.id,{ responsavel: e.target.value })} title={c.responsavel}/></td>
                 <td>{new Date(c.updatedAt).toLocaleString()}</td>
                 <td>
                   <button 
                     className="btn delete-btn" 
-                    onClick={()=> {
-                      if(confirm(t(lang,'deleteConfirm'))){
-                        removeCase(c.id)
-                      }
-                    }}
+                    onClick={()=> setConfirmDeleteId(c.id)}
                     title={t(lang,'deleteCase')}
                   >
                     <svg 
@@ -290,8 +337,74 @@ export function CaseTable(){
         <div>{cases.length} {t(lang,'rowsCount')}</div>
         <div>{t(lang,'shortcuts')}</div>
       </div>
+      {reasonFor && (
+        <div className="modal-backdrop" onClick={()=> {
+          // cancelar: reverter a seleção
+          /* sem checkbox de impedido; apenas reverte status quando veio de status */
+          if(reasonSource==='status' && pendingStatus){ setStatus(pendingStatus.id, pendingStatus.prev) }
+          setReasonFor(null); setReasonText(''); setReasonSource(null); setPendingStatus(null)
+        }}>
+          <div className="modal" onClick={e=> e.stopPropagation()} style={{maxWidth:520}}>
+            <div className="modal-header">
+              <h3 className="modal-title">{t(lang,'reason')}</h3>
+              <button className="modal-close" onClick={()=> { 
+                if(reasonSource==='status' && pendingStatus){ setStatus(pendingStatus.id, pendingStatus.prev) }
+                setReasonFor(null); setReasonText(''); setReasonSource(null); setPendingStatus(null)
+              }} aria-label={t(lang,'close')}>×</button>
+            </div>
+            <div className="modal-body">
+              <input 
+                className="btn" 
+                placeholder={t(lang,'placeholderReason')} 
+                value={reasonText} 
+                onChange={e=> setReasonText(e.target.value)} 
+                autoFocus
+              />
+            </div>
+            <div className="modal-footer">
+              <button className="btn" onClick={()=> { 
+                if(reasonSource==='status' && pendingStatus){ setStatus(pendingStatus.id, pendingStatus.prev) }
+                setReasonFor(null); setReasonText(''); setReasonSource(null); setPendingStatus(null)
+              }}>{t(lang,'cancel')}</button>
+              <button className="btn primary" onClick={()=> { 
+                if(reasonFor && reasonText.trim()){ 
+                  updateCase(reasonFor, { motivo: reasonText.trim() }); 
+                  setReasonFor(null); setReasonText(''); setReasonSource(null); setPendingStatus(null)
+                } 
+              }} disabled={!reasonText.trim()}>{t(lang,'confirm')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {alertDialog && (
+        <div className="modal-backdrop" onClick={()=> setAlertDialog(null)}>
+          <div className="modal" onClick={e=> e.stopPropagation()} style={{maxWidth:520}}>
+            <div className="modal-header">
+              <h3 className="modal-title">QAtlas</h3>
+              <button className="modal-close" onClick={()=> setAlertDialog(null)} aria-label={t(lang,'close')}>×</button>
+            </div>
+            <div className="modal-body">{alertDialog}</div>
+            <div className="modal-footer">
+              <button className="btn primary" onClick={()=> setAlertDialog(null)}>OK</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {confirmDeleteId && (
+        <div className="modal-backdrop" onClick={()=> setConfirmDeleteId(null)}>
+          <div className="modal" onClick={e=> e.stopPropagation()} style={{maxWidth:520}}>
+            <div className="modal-header">
+              <h3 className="modal-title">{t(lang,'deleteCase')}</h3>
+              <button className="modal-close" onClick={()=> setConfirmDeleteId(null)} aria-label={t(lang,'close')}>×</button>
+            </div>
+            <div className="modal-body">{t(lang,'deleteConfirm')}</div>
+            <div className="modal-footer">
+              <button className="btn" onClick={()=> setConfirmDeleteId(null)}>{t(lang,'cancel')}</button>
+              <button className="btn primary" onClick={()=> { if(confirmDeleteId){ removeCase(confirmDeleteId) } setConfirmDeleteId(null) }}>{t(lang,'confirm')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-
-

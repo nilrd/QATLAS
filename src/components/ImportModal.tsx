@@ -35,25 +35,30 @@ export function ImportModal({ onClose }: { onClose: ()=>void }){
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()}>
-        <h3>{t(lang,'importTitle')}</h3>
-        <input type="file" accept=".csv" onChange={e=> e.target.files && handleFile(e.target.files[0])} />
-        <div style={{marginTop:8}}>
-          <label><input type="radio" checked={mode==='merge'} onChange={()=> setMode('merge')} /> {t(lang,'merge')}</label>
-          <label style={{marginLeft:12}}><input type="radio" checked={mode==='overwrite'} onChange={()=> setMode('overwrite')} /> {t(lang,'overwrite')}</label>
+        <div className="modal-header">
+          <h3 className="modal-title">{t(lang,'importTitle')}</h3>
+          <button className="modal-close" onClick={onClose} aria-label={t(lang,'close')}>×</button>
         </div>
-        {rows && (
-          <div style={{maxHeight:240, overflow:'auto', marginTop:8}}>
-            <table>
-              <thead><tr><th>{t(lang,'id')}</th><th>{t(lang,'title')}</th><th>{t(lang,'status')}</th><th>{t(lang,'executed')}</th><th>{t(lang,'updated')}</th></tr></thead>
-              <tbody>
-                {rows.slice(0,20).map(r=> (
-                  <tr key={r.id}><td>{r.id}</td><td>{r.titulo}</td><td>{r.status}</td><td>{String(r.executado)}</td><td>{new Date(r.updatedAt).toLocaleString()}</td></tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="modal-body">
+          <input type="file" accept=".csv" onChange={e=> e.target.files && handleFile(e.target.files[0])} />
+          <div style={{marginTop:8}}>
+            <label><input type="radio" checked={mode==='merge'} onChange={()=> setMode('merge')} /> {t(lang,'merge')}</label>
+            <label style={{marginLeft:12}}><input type="radio" checked={mode==='overwrite'} onChange={()=> setMode('overwrite')} /> {t(lang,'overwrite')}</label>
           </div>
-        )}
-        <div style={{display:'flex',justifyContent:'flex-end',gap:8, marginTop:12}}>
+          {rows && (
+            <div style={{maxHeight:240, overflow:'auto', marginTop:8}}>
+              <table>
+                <thead><tr><th>{t(lang,'id')}</th><th>{t(lang,'title')}</th><th>{t(lang,'status')}</th><th>{t(lang,'executed')}</th><th>{t(lang,'updated')}</th></tr></thead>
+                <tbody>
+                  {rows.slice(0,20).map(r=> (
+                    <tr key={r.id}><td>{r.id}</td><td>{r.titulo}</td><td>{r.status}</td><td>{String(r.executado)}</td><td>{new Date(r.updatedAt).toLocaleString()}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        <div className="modal-footer">
           <button className="btn" onClick={onClose}>{t(lang,'cancel')}</button>
           <button className="btn primary" onClick={confirm} disabled={!rows}>{t(lang,'confirm')}</button>
         </div>
@@ -61,5 +66,4 @@ export function ImportModal({ onClose }: { onClose: ()=>void }){
     </div>
   )
 }
-
 

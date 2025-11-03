@@ -69,12 +69,14 @@ export function App(){
     <div className="container">
       <Header onShowReports={()=> setShowReports(true)} onShowImport={()=> setShowImport(true)} />
       <SummaryCards />
-      <Filters />
-      <CaseTable />
+      <div className="filters-above-table">
+        <Filters />
+      </div>
+      <div className="table-section">
+        <CaseTable />
+      </div>
       {showImport && <ImportModal onClose={()=> setShowImport(false)} />}
       {showReports && <Reports onClose={()=> setShowReports(false)} />}
     </div>
   )
 }
-
-

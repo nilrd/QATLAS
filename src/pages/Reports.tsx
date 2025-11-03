@@ -126,8 +126,11 @@ export function Reports({ onClose }: { onClose: ()=>void }){
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:1200}}>
-        <div ref={containerRef}>
-          <h2>{t(lang,'reportsTitle')}</h2>
+        <div className="modal-header">
+          <h3 className="modal-title">{t(lang,'reportsTitle')}</h3>
+          <button className="modal-close" onClick={onClose} aria-label={t(lang,'close')}>×</button>
+        </div>
+        <div className="modal-body" ref={containerRef}>
           <div className="row">
             <div className="card" style={{minWidth:260}}>
               <div className="title">{t(lang,'avgUpdateTime')}</div>
@@ -186,13 +189,14 @@ export function Reports({ onClose }: { onClose: ()=>void }){
             </div>
           )}
         </div>
-        <div style={{display:'flex',justifyContent:'space-between',marginTop:12}}>
+        <div className="modal-footer" style={{justifyContent:'space-between'}}>
           <button className="btn" onClick={downloadPDF}>{t(lang,'downloadPDF')}</button>
-          <button className="btn" onClick={onClose}>{t(lang,'close')}</button>
+          <div>
+            <button className="btn" onClick={onClose}>{t(lang,'close')}</button>
+          </div>
         </div>
       </div>
     </div>
   )
 }
-
 

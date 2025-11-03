@@ -8,11 +8,13 @@ type Store = {
   history: QAtlasState[]
   future: QAtlasState[]
   addCase: () => void
+  duplicateCase: (id: string) => void
   updateCase: (id: string, patch: Partial<QACase>) => void
   removeCase: (id: string) => void
   setStatus: (id: string, status: Status) => void
   toggleExecuted: (id: string) => void
   toggleImpedido: (id: string) => void
+  toggleImpedidoUI: (id: string) => void
   removeAll: () => void
   exportCSV: () => string
   importCSV: (rows: any[], mode: 'merge'|'overwrite') => void
@@ -125,6 +127,15 @@ export const useStore = create<Store>((set,get)=>{
         return { ...s, meta:{...s.meta, updatedAt:new Date().toISOString()}, cases:[...s.cases, c] }
       })
     },
+    duplicateCase(id){
+      commit(s=>{
+        const src = s.cases.find(c=>c.id===id)
+        if(!src) return s
+        const newId = nextId(s.cases)
+        const copy: QACase = { ...src, id: newId, updatedAt: now() }
+        return { ...s, meta:{...s.meta, updatedAt:new Date().toISOString()}, cases:[...s.cases, copy] }
+      })
+    },
     removeCase(id){
       commit(s=>({ ...s, meta:{...s.meta, updatedAt:new Date().toISOString()}, cases: s.cases.filter(c=> c.id !== id) }))
     },
@@ -146,6 +157,19 @@ export const useStore = create<Store>((set,get)=>{
         const status: Status = executado && c.status==='NAO_EXECUTADO' ? 'PASSOU' : (!executado ? 'NAO_EXECUTADO' : c.status)
         return { ...c, executado, status, updatedAt: now() }
       }), meta:{...s.meta, updatedAt:new Date().toISOString()} }))
+    },
+    // Alterna impedido sem exigir motivo (para fluxo de UI que solicita depois)
+    toggleImpedidoUI(id){
+      commit(s=>({
+        ...s,
+        cases: s.cases.map(c=>{
+          if(c.id!==id) return c
+          const newImpedido = !c.impedido
+          const newStatus: Status = newImpedido ? 'IMPEDIDO' : (c.executado ? c.status : 'NAO_EXECUTADO')
+          return { ...c, impedido: newImpedido, status: newStatus, updatedAt: now() }
+        }),
+        meta:{...s.meta, updatedAt:new Date().toISOString()}
+      }))
     },
     toggleImpedido(id){
       commit(s=>{
@@ -196,5 +220,3 @@ export const useStore = create<Store>((set,get)=>{
     }
   }
 })
-
-
