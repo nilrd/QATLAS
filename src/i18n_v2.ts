@@ -1,0 +1,54 @@
+export type LangV2 = 'pt-BR'|'es-ES'|'en-US'
+
+const dictV2: Record<LangV2, Record<string,string>> = {
+  'pt-BR': {
+    project:'Projeto', newProject:'Novo projeto', add:'Adicionar', requirements:'Requisitos', requirement:'Requisito', allRequirements:'Todos os Requisitos',
+    title:'Título', type:'Tipo', status:'Status', link:'Link', description:'Descrição',
+    caseId:'Caso #', descriptionCol:'Descrição', suite:'Suite', executedEN:'Executado', updated:'Atualizado', actionsEN:'Ações',
+    searchCases:'Buscar casos', clear:'Limpar', clearFiltersEN:'Limpar Filtros', suitePlaceholder:'Suite (Login, Cadastro, ...)', expected:'Resultado Esperado', actual:'Resultado Real',
+    exportPDF:'Exportar PDF', exportXML:'Exportar XML', exportXLSX:'Exportar XLSX', exportBDD:'Exportar BDD', export:'Exportar',
+    blockedReason:'Motivo do bloqueio', whyBlocked:'Por que está bloqueado?', close:'Fechar',
+    total:'Total', passed:'Passou', failed:'Falhou', blocked:'Impedido',
+    delete:'Excluir', deleteCase:'Excluir Caso', deleteConfirm:'Tem certeza que deseja excluir este caso?',
+    newTestCase:'+ Novo Caso', steps:'Passos', addStep:'Adicionar Passo', gherkin:'Gherkin', openSteps:'Editar Passos', save:'Salvar',
+    testType:'Tipo de Teste', automationReady:'Apto para automação', note:'Observação', noRequirements:'Sem requisitos',
+    allStatus:'Todos os Status', optional:'opcional', cancel:'Cancelar', confirm:'Confirmar',
+    reqTypeEpic:'Épico', reqTypeStory:'História', reqTypeTask:'Tarefa', reqTypeBug:'Bug', reqTypeOther:'Outro',
+    reqStatusDraft:'Rascunho', reqStatusInProgress:'Em progresso', reqStatusInReview:'Em revisão', reqStatusApproved:'Aprovado'
+  },
+  'es-ES': {
+    project:'Proyecto', newProject:'Nuevo proyecto', add:'Agregar', requirements:'Requisitos', requirement:'Requisito', allRequirements:'Todos los Requisitos',
+    title:'Título', type:'Tipo', status:'Estado', link:'Enlace', description:'Descripción',
+    caseId:'Caso #', descriptionCol:'Descripción', suite:'Suite', executedEN:'Ejecutado', updated:'Actualizado', actionsEN:'Acciones',
+    searchCases:'Buscar casos', clear:'Limpiar', clearFiltersEN:'Limpiar Filtros', suitePlaceholder:'Suite (Login, Registro, ...)', expected:'Resultado Esperado', actual:'Resultado Real',
+    exportPDF:'Exportar PDF', exportXML:'Exportar XML', exportXLSX:'Exportar XLSX', exportBDD:'Exportar BDD', export:'Exportar',
+    blockedReason:'Motivo del bloqueo', whyBlocked:'¿Por qué está bloqueado?', close:'Cerrar',
+    total:'Total', passed:'Pasaron', failed:'Fallaron', blocked:'Impedido',
+    delete:'Eliminar', deleteCase:'Eliminar Caso', deleteConfirm:'¿Seguro que desea eliminar este caso?',
+    newTestCase:'+ Nuevo Caso', steps:'Pasos', addStep:'Agregar Paso', gherkin:'Gherkin', openSteps:'Editar Pasos', save:'Guardar',
+    testType:'Tipo de Prueba', automationReady:'Apto para automatización', note:'Observación', noRequirements:'Sin requisitos',
+    allStatus:'Todos los Estados', optional:'opcional', cancel:'Cancelar', confirm:'Confirmar',
+    reqTypeEpic:'Épica', reqTypeStory:'Historia', reqTypeTask:'Tarea', reqTypeBug:'Bug', reqTypeOther:'Otro',
+    reqStatusDraft:'Borrador', reqStatusInProgress:'En progreso', reqStatusInReview:'En revisión', reqStatusApproved:'Aprobado'
+  },
+  'en-US': {
+    project:'Project', newProject:'New project', add:'Add', requirements:'Requirements', requirement:'Requirement', allRequirements:'All Requirements',
+    title:'Title', type:'Type', status:'Status', link:'Link', description:'Description',
+    caseId:'Case #', descriptionCol:'Description', suite:'Suite', executedEN:'Executed', updated:'Updated', actionsEN:'Actions',
+    searchCases:'Search cases', clear:'Clear', clearFiltersEN:'Clear Filters', suitePlaceholder:'Suite (Login, Register, ...)', expected:'Expected', actual:'Actual',
+    exportPDF:'Export PDF', exportXML:'Export XML', exportXLSX:'Export XLSX', exportBDD:'Export BDD', export:'Export',
+    blockedReason:'Blocked Reason', whyBlocked:'Why is this blocked?', close:'Close',
+    total:'Total', passed:'Passed', failed:'Failed', blocked:'Blocked',
+    delete:'Delete', deleteCase:'Delete Case', deleteConfirm:'Are you sure you want to delete this case?',
+    newTestCase:'+ New Test Case', steps:'Steps', addStep:'Add Step', gherkin:'Gherkin', openSteps:'Edit Steps', save:'Save',
+    testType:'Test Type', automationReady:'Automation Ready', note:'Note', noRequirements:'No requirements',
+    allStatus:'All Status', optional:'optional', cancel:'Cancel', confirm:'Confirm',
+    reqTypeEpic:'Epic', reqTypeStory:'Story', reqTypeTask:'Task', reqTypeBug:'Bug', reqTypeOther:'Other',
+    reqStatusDraft:'Draft', reqStatusInProgress:'In Progress', reqStatusInReview:'In Review', reqStatusApproved:'Approved'
+  }
+}
+
+export function t2(lang: LangV2, key: string){
+  return dictV2[lang][key] ?? key
+}
+
