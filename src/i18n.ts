@@ -1,4 +1,4 @@
-export type Lang = 'pt-BR'|'es-ES'|'en-US'
+﻿export type Lang = 'pt-BR'|'es-ES'|'en-US'
 
 const dict: Record<Lang, Record<string,string>> = {
   'pt-BR': {
@@ -8,7 +8,7 @@ const dict: Record<Lang, Record<string,string>> = {
     generateBDD:'Gerar BDD', reports:'Relatórios', clearAll:'Limpar Tudo', theme:'Tema', language:'Idioma',
     case:'Caso de Teste', expected:'Resultado Esperado', actual:'Resultado Real', status:'Status', executed:'Executado?', impeded:'Impedido?', reason:'Motivo', evidence:'Evidência/Link', responsible:'Responsável', updatedAt:'Última Atualização',
     notExecuted:'Não Executado', yes:'Sim', no:'Não', preview:'Pré-visualização', merge:'Mesclar', overwrite:'Sobrescrever', cancel:'Cancelar', confirm:'Confirmar',
-    caseNumber:'N° CT', mode:'Modo', testType:'Tipo Teste', polarity:'Polaridade', steps:'Passos', automationReady:'Apto Automação',
+    caseNumber:'Nº CT', mode:'Modo', testType:'Tipo de Teste', polarity:'Polaridade', steps:'Passos', automationReady:'Apto Automação',
     stepByStep:'Step by Step', gherkin:'Gherkin (BDD)', positive:'Positivo', negative:'Negativo',
     passou:'Passou', falhou:'Falhou', impedido:'Impedido', naoExecutado:'Não Executado',
     placeholderCase:'Ex.: Login com credenciais válidas', placeholderTestType:'Ex.: Funcional', placeholderReason:'Obrigatório se impedido', placeholderEvidence:'Link/arquivo (obrigatório se falhou)',
@@ -26,21 +26,21 @@ const dict: Record<Lang, Record<string,string>> = {
     dashboard: 'Panel de QA — Casos de Prueba',
     total: 'Total de Pruebas', passed: 'Pasaron', failed: 'Fallaron', blocked: 'Impedidos',
     newCase: '+ Nuevo Caso', importCSV:'Importar CSV', exportCSV:'Exportar CSV',
-    generateBDD:'Generar BDD', reports:'Reportes', clearAll:'Limpar Todo', theme:'Tema', language:'Idioma',
+    generateBDD:'Generar BDD', reports:'Reportes', clearAll:'Limpiar Todo', theme:'Tema', language:'Idioma',
     case:'Caso de Prueba', expected:'Resultado Esperado', actual:'Resultado Real', status:'Estado', executed:'¿Ejecutado?', impeded:'¿Impedido?', reason:'Motivo', evidence:'Evidencia/Link', responsible:'Responsable', updatedAt:'Última Actualización',
     notExecuted:'No Ejecutado', yes:'Sí', no:'No', preview:'Vista previa', merge:'Mezclar', overwrite:'Sobrescribir', cancel:'Cancelar', confirm:'Confirmar',
-    caseNumber:'N° CT', mode:'Modo', testType:'Tipo de Prueba', polarity:'Polaridad', steps:'Pasos', automationReady:'Apto Automatización',
+    caseNumber:'Nº CT', mode:'Modo', testType:'Tipo de Prueba', polarity:'Polaridad', steps:'Pasos', automationReady:'Apto Automatización',
     stepByStep:'Step by Step', gherkin:'Gherkin (BDD)', positive:'Positivo', negative:'Negativo',
     passou:'Pasaron', falhou:'Fallaron', impedido:'Impedidos', naoExecutado:'No Ejecutado',
     placeholderCase:'Ej.: Login con credenciales válidas', placeholderTestType:'Ej.: Funcional', placeholderReason:'Obligatorio si impedido', placeholderEvidence:'Link/archivo (obligatorio si falló)',
     addStep:'Agregar Paso', stepsCount:'paso', stepsCountPlural:'pasos',
     validationFailedNoResult:'Al marcar como Falló, es obligatorio completar Resultado Real y Evidencia.', validationImpededNoReason:'Informe el motivo del impedimento.', validationAutomationOnlyGherkin:'Apto para Automatización solo puede marcarse si el Modo es Gherkin.', validationImpededBeforeReason:'Informe el motivo antes de marcar como impedido.',
-    allStatus:'Todos los Estados', allTypes:'Todos los Tipos', clearFilters:'Limpar Filtros', searchText:'Buscar texto',
+    allStatus:'Todos los Estados', allTypes:'Todos los Tipos', clearFilters:'Limpiar Filtros', searchText:'Buscar texto',
     importTitle:'Importar CSV', selectFile:'Seleccionar archivo CSV', id:'ID', title:'Título', updated:'Actualizado',
     reportsTitle:'Reportes', avgUpdateTime:'Tiempo promedio entre actualizaciones', totalCases:'Total de Casos', successRate:'Tasa de Éxito', summaryByType:'Resumen por Tipo de Prueba / Polaridad', typePolarity:'Tipo / Polaridad', passedCount:'Pasaron', failedCount:'Fallaron', blockedCount:'Impedidos', notExecutedCount:'No Ejecutados', downloadPDF:'Descargar Reporte (.PDF)', close:'Cerrar',
     noAutomationCases:'No se encontraron casos aptos para automatización. Marque casos como "Apto Automatización" y Modo = Gherkin.', clearAllConfirm:'¿Está seguro que desea limpiar todos los casos? Se hará una copia de seguridad CSV automáticamente antes de eliminar.', backupDone:'Respaldo realizado. ¿Confirmar limpieza de todos los datos?', automationTooltip:'Generar BDD', automationTooltipDisabled:'Ningún caso apto para automatización',
     rowsCount:'líneas', shortcuts:'Atajos: N/E/I/P/F/Ctrl+S/Ctrl+B/Ctrl+R', newCaseButton:'+ Nuevo Caso de Prueba',
-    langPT:'Português (Brasil)', langES:'Español (España)', langEN:'English (United States)',
+    langPT:'Portugués (Brasil)', langES:'Español (España)', langEN:'English (United States)',
     deleteCase:'Eliminar Caso', deleteConfirm:'¿Está seguro que desea eliminar este caso de prueba?', actions:'Acciones'
   },
   'en-US': {
@@ -69,3 +69,4 @@ const dict: Record<Lang, Record<string,string>> = {
 export function t(lang: Lang, key: string){
   return dict[lang][key] ?? key
 }
+

@@ -5,7 +5,7 @@ import { t } from '../i18n'
 import { useStoreV2 } from '../state_v2'
 import { t2 } from '../i18n_v2'
 
-export function Header({ onShowReports, onShowImport }: { onShowReports: ()=>void; onShowImport: ()=>void }){
+export function Header({ onShowReports, onShowImport, useV2 }: { onShowReports: ()=>void; onShowImport: ()=>void; useV2: boolean }){
   const { data, addCase, exportCSV, generateBDD, removeAll, setTheme, setLang } = useStore(s=>({
     data: s.data,
     addCase: s.addCase,
@@ -62,7 +62,7 @@ export function Header({ onShowReports, onShowImport }: { onShowReports: ()=>voi
   }
 
   const aptosCount = data.cases.filter(c => c.aptoAutomacao && c.modo === 'Gherkin').length
-  const usingV2 = (()=>{ try{ return localStorage.getItem('qatlas:useV2') === '1' }catch{ return false } })()
+  const usingV2 = useV2
 
   // v2 export helpers (only used when usingV2)
   function exportV2_PDF(){
@@ -157,7 +157,7 @@ export function Header({ onShowReports, onShowImport }: { onShowReports: ()=>voi
       <div className="actions">
         <button className="btn primary" onClick={addCase}>{t(data.meta.lang,'newCase')}</button>
         <button className="btn" onClick={onShowImport}>{t(data.meta.lang,'importCSV')}</button>
-        <button className="btn" onClick={()=> setOpenExport(true)}>{usingV2 ? t2(v2.data.idioma,'export') : t(data.meta.lang,'exportCSV')}</button>
+        <button className="btn" onClick={()=> setOpenExport(true)}>{t2(v2.data.idioma,'export')}</button>
         <button className="btn" onClick={onShowReports}>{t(data.meta.lang,'reports')}</button>
         <button className="btn" onClick={handleClearAll}>{t(data.meta.lang,'clearAll')}</button>
         <button className="btn" onClick={()=> setTheme(data.meta.theme==='light'?'dark':'light')}>{data.meta.theme==='light'?'☀️':'🌙'} {t(data.meta.lang,'theme')}</button>
@@ -192,7 +192,7 @@ export function Header({ onShowReports, onShowImport }: { onShowReports: ()=>voi
         <div className="modal-backdrop" onClick={()=> setOpenExport(false)}>
           <div className="modal" onClick={e=> e.stopPropagation()} style={{maxWidth:420}}>
             <div className="modal-header">
-              <h3 className="modal-title">{usingV2 ? t2(v2.data.idioma,'export') : t(data.meta.lang,'exportCSV')}</h3>
+              <h3 className="modal-title">{t2(v2.data.idioma,'export')}</h3>
               <button className="modal-close" onClick={()=> setOpenExport(false)} aria-label={usingV2 ? t2(v2.data.idioma,'close') : t(data.meta.lang,'close')}>x</button>
             </div>
             <div className="modal-body" style={{display:'grid', gap:8}}>

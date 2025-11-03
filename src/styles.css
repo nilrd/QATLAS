@@ -30,12 +30,12 @@
 }
 [data-theme="dark"] {
   /* Cores base */
-  --bg: #0b1220;
+  --bg: #0f172a;
   --fg: #e5e7eb;
   --muted: #9ca3af;
   --card: #111827;
-  --border: #374151;
-  --background-alt: #1f2937;
+  --border: #3a3a3a;
+  --background-alt: #0f1b33;
   --gray: #4b5563; /* bordas no dark */
 
   /* Cores de status no tema escuro */
@@ -54,7 +54,7 @@
   /* Cores de interação */
   --primary: #3b82f6;
   --primary-light: rgba(59,130,246,0.1);
-  --hover: rgba(255,255,255,0.05);
+  --hover: rgba(255,255,255,0.06);
 }
 *{box-sizing:border-box}
 html,body,#root{height:100%}
@@ -353,7 +353,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: var(--card);
-  border: 1px solid var(--gray);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   min-width: 1600px;

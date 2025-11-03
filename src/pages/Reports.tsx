@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+﻿import { useEffect, useRef } from 'react'
 import { useStore } from '../state'
 import { Chart, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'
 import html2canvas from 'html2canvas'
@@ -33,7 +33,7 @@ export function Reports({ onClose }: { onClose: ()=>void }){
         }] 
       } 
     })
-    const byType = aggregateBy(cases.map(c=> ({ key: `${c.tipoTeste||'—'} / ${c.polaridade||'—'}`, status: c.status })))
+    const byType = aggregateBy(cases.map(c=> ({ key: `${c.tipoTeste||'â€”'} / ${c.polaridade||'â€”'}`, status: c.status })))
     const bar = new Chart(bctx, { 
       type:'bar', 
       data:{ 
@@ -84,13 +84,13 @@ export function Reports({ onClose }: { onClose: ()=>void }){
     const pdf = new jsPDF('p', 'mm', 'a4')
     const width = 190
     const height = (canvas.height * width) / canvas.width
-    pdf.text('QAtlas — Relatório', 10, 10)
+    pdf.text('QAtlas - Relatório', 10, 10)
     pdf.addImage(imgData, 'PNG', 10, 18, width, height)
     pdf.save('qatlas-relatorio.pdf')
   }
 
   const avgTime = () => {
-    if(cases.length<2) return '—'
+    if(cases.length<2) return 'â€”'
     const sorted = [...cases].sort((a,b)=>a.updatedAt-b.updatedAt)
     let total = 0
     for(let i=1;i<sorted.length;i++){ total += (sorted[i].updatedAt - sorted[i-1].updatedAt) }
@@ -102,7 +102,7 @@ export function Reports({ onClose }: { onClose: ()=>void }){
   const summaryByType = () => {
     const map: Record<string, { total: number; passed: number; failed: number; blocked: number; notExec: number }> = {}
     cases.forEach(c => {
-      const key = `${c.tipoTeste || 'Não definido'} / ${c.polaridade || '—'}`
+      const key = `${c.tipoTeste || 'NÃ£o definido'} / ${c.polaridade || 'â€”'}`
       if(!map[key]){
         map[key] = { total: 0, passed: 0, failed: 0, blocked: 0, notExec: 0 }
       }
@@ -128,7 +128,7 @@ export function Reports({ onClose }: { onClose: ()=>void }){
       <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:1200}}>
         <div className="modal-header">
           <h3 className="modal-title">{t(lang,'reportsTitle')}</h3>
-          <button className="modal-close" onClick={onClose} aria-label={t(lang,'close')}>×</button>
+          <button className="modal-close" onClick={onClose} aria-label={t(lang,'close')}>Ã—</button>
         </div>
         <div className="modal-body" ref={containerRef}>
           <div className="row">
@@ -199,4 +199,5 @@ export function Reports({ onClose }: { onClose: ()=>void }){
     </div>
   )
 }
+
 

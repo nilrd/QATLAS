@@ -91,7 +91,7 @@ export function App(){
 
   return (
     <div className="container">
-      <Header onShowReports={()=> setShowReports(true)} onShowImport={()=> setShowImport(true)} />
+      <Header onShowReports={()=> setShowReports(true)} onShowImport={()=> setShowImport(true)} useV2={useV2} />
       <div style={{marginBottom:12, display:'flex', justifyContent:'flex-end'}}>
         <button className="btn" onClick={()=> setUseV2(v=>!v)}>{useV2? 'Usando v2 (preview) — Alternar v1' : 'Alternar para v2 (preview)'}</button>
       </div>

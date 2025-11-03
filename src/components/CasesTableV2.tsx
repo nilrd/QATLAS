@@ -38,6 +38,12 @@ export function CasesTableV2(){
   const [stepsFor, setStepsFor] = useState<string|null>(null)
   const [stepsText, setStepsText] = useState('')
 
+  function focusCell(rowEl: HTMLTableRowElement | null, col: number){
+    if(!rowEl) return
+    const target = rowEl.querySelector(`[data-col="${col}"]`) as HTMLElement | null
+    if(target) (target as any).focus?.()
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLDivElement>){
     if(reasonFor){ if(e.key==='Escape'){ e.preventDefault(); if(pendingStatus){ updateTestCase(pendingStatus.id, { status: pendingStatus.prev }); setPendingStatus(null) } setReasonFor(null); setReasonText('') }; return }
     if(!selectedId){ if(e.key.toLowerCase()==='n'){ e.preventDefault(); addTestCase(); return } return }
@@ -48,6 +54,59 @@ export function CasesTableV2(){
     if(e.key.toLowerCase()==='p'){ e.preventDefault(); const tc = cases.find(c=>c.id===id)!; if(!tc.executed) updateTestCase(id,{ executed:true }); setCaseStatus(id,'Passed'); return }
     if(e.key.toLowerCase()==='f'){ e.preventDefault(); const tc = cases.find(c=>c.id===id)!; if(!tc.executed) updateTestCase(id,{ executed:true }); setCaseStatus(id,'Failed'); return }
     if(e.key.toLowerCase()==='i'){ e.preventDefault(); const tc = cases.find(c=>c.id===id)!; if(!tc.blockedReason){ setPendingStatus({ id, prev: tc.status }); setReasonFor(id); setReasonText(''); updateTestCase(id, { status:'Blocked' }); } else { setCaseStatus(id,'Blocked') } return }
+
+    // Navegação estilo planilha
+    const active = document.activeElement as HTMLElement
+    if(active && (active.tagName==='INPUT' || active.tagName==='SELECT' || active.tagName==='TEXTAREA') && active.hasAttribute('data-col')){
+      // Copiar/colar simples (Ctrl+C / Ctrl+V)
+      const clipKey = '__QATLAS_CLIP__'
+      if(e.ctrlKey && e.key.toLowerCase()==='c'){
+        e.preventDefault()
+        const val = (active as any).value ?? (active as any).textContent ?? ''
+        ;(window as any)[clipKey] = String(val)
+        return
+      }
+      if(e.ctrlKey && e.key.toLowerCase()==='v'){
+        e.preventDefault()
+        const clip = String((window as any)[clipKey] ?? '')
+        const col = parseInt(active.getAttribute('data-col')||'0',10)
+        const tr = active.closest('tr') as HTMLTableRowElement | null
+        const rid = tr?.getAttribute('data-id') || ''
+        if(active.tagName==='SELECT'){
+          ;(active as HTMLSelectElement).value = clip
+          if(col===3){ updateTestCase(rid, { requirementId: clip||undefined }) }
+          if(col===6){ onStatusChange(cases.find(c=>c.id===rid)!, clip as TestStatusV2) }
+        } else {
+          ;(active as HTMLInputElement).value = clip
+          if(col===0) updateTestCase(rid, { descricao: clip })
+          if(col===1) updateTestCase(rid, { suite: clip })
+          if(col===2) updateTestCase(rid, { tipoTeste: clip })
+          if(col===4) updateTestCase(rid, { resultadoEsperado: clip })
+          if(col===5) updateTestCase(rid, { resultadoReal: clip })
+        }
+        return
+      }
+      const col = parseInt(active.getAttribute('data-col') || '0', 10)
+      const rowEl = active.closest('tr') as HTMLTableRowElement | null
+      const rowsEls = Array.from(document.querySelectorAll('.qa-table tbody tr')) as HTMLTableRowElement[]
+      const index = rowsEls.findIndex(r=> r===rowEl)
+      if(e.key==='Enter'){
+        e.preventDefault()
+        const nextRow = rowsEls[Math.min(rowsEls.length-1, index + (e.ctrlKey? 1 : 0))]
+        if(e.ctrlKey){ focusCell(nextRow, col); return }
+        // Enter sem Ctrl → ir para próxima coluna
+        focusCell(rowEl, col+1)
+        return
+      }
+      if(e.key==='ArrowRight'){ e.preventDefault(); focusCell(rowEl, col+1); return }
+      if(e.key==='ArrowLeft'){ e.preventDefault(); focusCell(rowEl, Math.max(0, col-1)); return }
+      if(e.key==='ArrowDown'){ e.preventDefault(); focusCell(rowsEls[Math.min(rowsEls.length-1, index+1)] || rowEl, col); return }
+      if(e.key==='ArrowUp'){ e.preventDefault(); focusCell(rowsEls[Math.max(0, index-1)] || rowEl, col); return }
+      if(e.key==='Home'){ e.preventDefault(); focusCell(rowEl, 0); return }
+      if(e.key==='End'){ e.preventDefault(); focusCell(rowEl, 6); return }
+      if(e.key==='PageDown'){ e.preventDefault(); focusCell(rowsEls[Math.min(rowsEls.length-1, index+10)] || rowEl, col); return }
+      if(e.key==='PageUp'){ e.preventDefault(); focusCell(rowsEls[Math.max(0, index-10)] || rowEl, col); return }
+    }
   }
 
   // Table columns (TanStack)
@@ -91,11 +150,11 @@ export function CasesTableV2(){
       </select>
     )},
     { id:'expected', header: t2(data.idioma,'expected'), size: 220, cell: ({ row })=> (
-      <input data-col={3} value={row.original.resultadoEsperado} placeholder={t2(data.idioma,'expected')}
+      <input data-col={4} value={row.original.resultadoEsperado} placeholder={t2(data.idioma,'expected')}
         onChange={e=> updateTestCase(row.original.id, { resultadoEsperado: (e.target as any).value })} />
     )},
     { id:'actual', header: t2(data.idioma,'actual'), size: 220, cell: ({ row })=> (
-      <input data-col={4} value={row.original.resultadoReal || ''} placeholder={t2(data.idioma,'actual')}
+      <input data-col={5} value={row.original.resultadoReal || ''} placeholder={t2(data.idioma,'actual')}
         onChange={e=> updateTestCase(row.original.id, { resultadoReal: (e.target as any).value })} />
     )},
     { id:'steps', header: t2(data.idioma,'steps'), size: 160, cell: ({ row })=> (
@@ -107,7 +166,7 @@ export function CasesTableV2(){
     { id:'status', header: t2(data.idioma,'status'), size: 180, cell: ({ row })=> (
       <div>
         <select
-          data-col={5}
+          data-col={6}
           value={row.original.status}
           onChange={e=> onStatusChange(row.original, (e.target as any).value as TestStatusV2)}
         >
@@ -157,9 +216,21 @@ export function CasesTableV2(){
     state: {},
   })
 
+  // Simple virtualization
+  const rowHeight = 44
+  const [scrollTop, setScrollTop] = useState(0)
+  const [vpH, setVpH] = useState(480)
+  const rows = table.getRowModel().rows
+  const total = rows.length
+  const start = Math.max(0, Math.floor(scrollTop / rowHeight) - 5)
+  const visibleCount = Math.ceil(vpH / rowHeight) + 10
+  const end = Math.min(total, start + visibleCount)
+  const topPad = start * rowHeight
+  const bottomPad = (total - end) * rowHeight
+
   return (
     <div className="table-card" tabIndex={0} onKeyDown={onKeyDown}>
-      <div className="table-wrap">
+      <div className="table-wrap" onScroll={e=> { const el=e.currentTarget; setScrollTop(el.scrollTop); setVpH(el.clientHeight) }}>
         <table className="qa-table">
           <thead>
             {table.getHeaderGroups().map(hg=> (
@@ -174,8 +245,11 @@ export function CasesTableV2(){
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id} data-id={row.original.id} onClick={()=> setSelectedId(row.original.id)}>
+            {topPad>0 && (
+              <tr aria-hidden="true"><td colSpan={table.getAllLeafColumns().length} style={{height: topPad}}/></tr>
+            )}
+            {rows.slice(start, end).map(row => (
+              <tr key={row.id} data-id={row.original.id} onClick={()=> setSelectedId(row.original.id)} style={{height: rowHeight}}>
                 {row.getVisibleCells().map((cell, idx)=> (
                   <td key={cell.id} className={idx===0? 'sticky-left': (cell.column.id==='actions'? 'sticky-right':'')} style={{ width: cell.column.getSize() }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -183,6 +257,9 @@ export function CasesTableV2(){
                 ))}
               </tr>
             ))}
+            {bottomPad>0 && (
+              <tr aria-hidden="true"><td colSpan={table.getAllLeafColumns().length} style={{height: bottomPad}}/></tr>
+            )}
             <tr>
               <td colSpan={table.getAllLeafColumns().length}>
                 <button className="btn" onClick={()=> addTestCase()}>+ {t2(data.idioma,'newTestCase')}</button>
@@ -236,4 +313,3 @@ export function CasesTableV2(){
     </div>
   )
 }
-
