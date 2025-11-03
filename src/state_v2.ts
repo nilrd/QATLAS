@@ -264,13 +264,10 @@ export const useStoreV2 = create<StoreV2>((set,get)=>{
         const p = activeProject(s)
         const cases = p.casosTeste.map(c=>{
           if(c.id!==id) return c
-          if((status==='Passed' || status==='Failed') && !c.executed){
-            return c
-          }
           if(status==='Blocked' && !c.blockedReason){
             return c
           }
-          return { ...c, status, executed: status==='Not Executed'? false : (c.executed || status==='Passed' || status==='Failed'), dataAtualizacao: new Date().toISOString() }
+          return { ...c, status, executed: status!=='Not Executed', dataAtualizacao: new Date().toISOString() }
         })
         const updated: ProjectV2 = { ...p, casosTeste: cases }
         return { ...s, projetos: s.projetos.map(x=> x.id===p.id? updated: x) }
@@ -280,4 +277,3 @@ export const useStoreV2 = create<StoreV2>((set,get)=>{
     setLang(l){ commit(s=> ({ ...s, idioma: l })) },
   }
 })
-

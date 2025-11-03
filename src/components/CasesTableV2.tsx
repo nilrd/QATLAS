@@ -2,12 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { useStoreV2 } from '../state_v2'
 import type { TestCaseV2, TestStatusV2 } from '../types_v2'
 import { t2 } from '../i18n_v2'
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  ColumnDef,
-} from '@tanstack/react-table'
+import { flexRender, getCoreRowModel, useReactTable, ColumnDef } from '@tanstack/react-table'
 
 function StatusChipV2({ s }: { s: TestStatusV2 }){
   const map: Record<TestStatusV2, { cls: string; label: string }> = {
@@ -37,6 +32,8 @@ export function CasesTableV2(){
   const [selectedId, setSelectedId] = useState<string|null>(null)
   const [stepsFor, setStepsFor] = useState<string|null>(null)
   const [stepsText, setStepsText] = useState('')
+  const [failFor, setFailFor] = useState<string|null>(null)
+  const [failText, setFailText] = useState('')
 
   function focusCell(rowEl: HTMLTableRowElement | null, col: number){
     if(!rowEl) return
@@ -51,14 +48,12 @@ export function CasesTableV2(){
     if(e.ctrlKey && (e.key.toLowerCase()==='d')){ e.preventDefault(); (useStoreV2.getState() as any).duplicateTestCase?.(id); return }
     if(e.key.toLowerCase()==='n'){ e.preventDefault(); addTestCase(); return }
     if(e.key.toLowerCase()==='e'){ e.preventDefault(); const row = document.querySelector(`tr[data-id="${id}"]`) as HTMLTableRowElement|null; const first = row?.querySelector('input,select,textarea') as HTMLElement|null; first?.focus(); return }
-    if(e.key.toLowerCase()==='p'){ e.preventDefault(); const tc = cases.find(c=>c.id===id)!; if(!tc.executed) updateTestCase(id,{ executed:true }); setCaseStatus(id,'Passed'); return }
-    if(e.key.toLowerCase()==='f'){ e.preventDefault(); const tc = cases.find(c=>c.id===id)!; if(!tc.executed) updateTestCase(id,{ executed:true }); setCaseStatus(id,'Failed'); return }
+    if(e.key.toLowerCase()==='p'){ e.preventDefault(); setCaseStatus(id,'Passed'); return }
+    if(e.key.toLowerCase()==='f'){ e.preventDefault(); const tc = cases.find(c=>c.id===id)!; if(!(tc.resultadoReal||'').trim()){ setFailFor(id); setFailText('') } else { setCaseStatus(id,'Failed') } return }
     if(e.key.toLowerCase()==='i'){ e.preventDefault(); const tc = cases.find(c=>c.id===id)!; if(!tc.blockedReason){ setPendingStatus({ id, prev: tc.status }); setReasonFor(id); setReasonText(''); updateTestCase(id, { status:'Blocked' }); } else { setCaseStatus(id,'Blocked') } return }
 
-    // Navegação estilo planilha
     const active = document.activeElement as HTMLElement
     if(active && (active.tagName==='INPUT' || active.tagName==='SELECT' || active.tagName==='TEXTAREA') && active.hasAttribute('data-col')){
-      // Copiar/colar simples (Ctrl+C / Ctrl+V)
       const clipKey = '__QATLAS_CLIP__'
       if(e.ctrlKey && e.key.toLowerCase()==='c'){
         e.preventDefault()
@@ -94,7 +89,6 @@ export function CasesTableV2(){
         e.preventDefault()
         const nextRow = rowsEls[Math.min(rowsEls.length-1, index + (e.ctrlKey? 1 : 0))]
         if(e.ctrlKey){ focusCell(nextRow, col); return }
-        // Enter sem Ctrl → ir para próxima coluna
         focusCell(rowEl, col+1)
         return
       }
@@ -109,43 +103,27 @@ export function CasesTableV2(){
     }
   }
 
-  // Table columns (TanStack)
   const columns = useMemo<ColumnDef<TestCaseV2>[]>(()=>[
     { id:'id', header: t2(data.idioma,'caseId'), size: 100, cell: info=> <b>{info.row.original.id}</b> },
     { id:'descricao', header: t2(data.idioma,'descriptionCol'), size: 280, cell: ({ row })=> (
-      <input
-        data-col={0}
-        value={(row.original as any).descricao ?? (row.original as any)['descri��ǜo'] ?? ''}
-        placeholder={t2(data.idioma,'descriptionCol')}
-        onChange={e=> updateTestCase(row.original.id, { descricao: (e.target as any).value })}
-      />
+      <input data-col={0} value={(row.original as any).descricao ?? ''} placeholder={t2(data.idioma,'descriptionCol')}
+        onChange={e=> updateTestCase(row.original.id, { descricao: (e.target as any).value })} />
     )},
     { id:'suite', header: t2(data.idioma,'suite'), size: 180, cell: ({ row })=> (
-      <input
-        data-col={1}
-        value={row.original.suite}
-        placeholder={t2(data.idioma,'suitePlaceholder')}
-        onChange={e=> updateTestCase(row.original.id, { suite: (e.target as any).value })}
-      />
+      <input data-col={1} value={row.original.suite} placeholder={t2(data.idioma,'suitePlaceholder')}
+        onChange={e=> updateTestCase(row.original.id, { suite: (e.target as any).value })} />
     )},
     { id:'testType', header: t2(data.idioma,'testType'), size: 160, cell: ({ row })=> (
-      <input
-        data-col={2}
-        value={row.original.tipoTeste || ''}
-        placeholder={t2(data.idioma,'testType')}
-        onChange={e=> updateTestCase(row.original.id, { tipoTeste: (e.target as any).value })}
-      />
+      <input data-col={2} value={row.original.tipoTeste || ''} placeholder={t2(data.idioma,'testType')}
+        onChange={e=> updateTestCase(row.original.id, { tipoTeste: (e.target as any).value })} />
     )},
     { id:'req', header: t2(data.idioma,'requirement'), size: 220, cell: ({ row })=> (
-      <select
-        data-col={3}
-        value={row.original.requirementId || ''}
-        onChange={e=> updateTestCase(row.original.id, { requirementId: (e.target as any).value || undefined })}
-      >
+      <select data-col={3} value={row.original.requirementId || ''}
+        onChange={e=> updateTestCase(row.original.id, { requirementId: (e.target as any).value || undefined })}>
         <option value="">—</option>
         {p.requerimentos.length===0 && <option value="" disabled>{t2(data.idioma,'noRequirements')}</option>}
         {p.requerimentos.map(r=> (
-          <option key={r.id} value={r.id}>{r.id} — {(r as any).titulo ?? (r as any)['t��tulo'] ?? ''}</option>
+          <option key={r.id} value={r.id}>{r.id} — {(r as any).titulo ?? ''}</option>
         ))}
       </select>
     )},
@@ -165,15 +143,12 @@ export function CasesTableV2(){
     )},
     { id:'status', header: t2(data.idioma,'status'), size: 180, cell: ({ row })=> (
       <div>
-        <select
-          data-col={6}
-          value={row.original.status}
-          onChange={e=> onStatusChange(row.original, (e.target as any).value as TestStatusV2)}
-        >
-          <option>Not Executed</option>
-          <option>Passed</option>
-          <option>Failed</option>
-          <option>Blocked</option>
+        <select data-col={6} value={row.original.status} onChange={e=> onStatusChange(row.original, (e.target as any).value as TestStatusV2)}>
+          {(['Not Executed','Passed','Failed','Blocked'] as TestStatusV2[]).map(v=> (
+            <option key={v} value={v}>
+              {v==='Not Executed'? t2(data.idioma,'notExecuted') : v==='Passed'? t2(data.idioma,'passed') : v==='Failed'? t2(data.idioma,'failed') : t2(data.idioma,'blocked')}
+            </option>
+          ))}
         </select>
         <div style={{marginTop:6}}><StatusChipV2 s={row.original.status} /></div>
         {row.original.status==='Blocked' && (row.original.blockedReason||'').trim() && (
@@ -191,7 +166,7 @@ export function CasesTableV2(){
       <input value={row.original.observacao || ''} placeholder={t2(data.idioma,'note')} onChange={e=> updateTestCase(row.original.id, { observacao: (e.target as any).value })} />
     )},
     { id:'updated', header: t2(data.idioma,'updated'), size: 200, cell: ({ row })=> (
-      <>{new Date(((row.original as any).dataAtualizacao ?? (row.original as any)['dataAtualiza��ǜo'] ?? (row.original as any)['dataAtualização']) as any).toLocaleString()}</>
+      <>{new Date((row.original as any).dataAtualizacao as any).toLocaleString()}</>
     )},
     { id:'actions', header: t2(data.idioma,'actionsEN'), size: 120, cell: ({ row })=> (
       <div style={{display:'flex', gap:6}}>
@@ -202,21 +177,13 @@ export function CasesTableV2(){
   ], [data.idioma, p.requerimentos])
 
   function onStatusChange(tc: TestCaseV2, status: TestStatusV2){
-    if((status==='Passed' || status==='Failed') && !tc.executed){ return }
     if(status==='Blocked' && !tc.blockedReason){ setPendingStatus({ id: tc.id, prev: tc.status }); setReasonFor(tc.id); setReasonText(''); updateTestCase(tc.id, { status }); return }
+    if(status==='Failed' && !(tc.resultadoReal||'').trim()){ setFailFor(tc.id); setFailText(''); return }
     setCaseStatus(tc.id, status)
   }
 
-  const table = useReactTable({
-    data: cases,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    columnResizeMode: 'onChange',
-    defaultColumn: { size: 180 },
-    state: {},
-  })
+  const table = useReactTable({ data: cases, columns, getCoreRowModel: getCoreRowModel(), columnResizeMode: 'onChange', defaultColumn: { size: 180 }, state: {} })
 
-  // Simple virtualization
   const rowHeight = 44
   const [scrollTop, setScrollTop] = useState(0)
   const [vpH, setVpH] = useState(480)
@@ -245,9 +212,7 @@ export function CasesTableV2(){
             ))}
           </thead>
           <tbody>
-            {topPad>0 && (
-              <tr aria-hidden="true"><td colSpan={table.getAllLeafColumns().length} style={{height: topPad}}/></tr>
-            )}
+            {topPad>0 && (<tr aria-hidden="true"><td colSpan={table.getAllLeafColumns().length} style={{height: topPad}}/></tr>)}
             {rows.slice(start, end).map(row => (
               <tr key={row.id} data-id={row.original.id} onClick={()=> setSelectedId(row.original.id)} style={{height: rowHeight}}>
                 {row.getVisibleCells().map((cell, idx)=> (
@@ -257,9 +222,7 @@ export function CasesTableV2(){
                 ))}
               </tr>
             ))}
-            {bottomPad>0 && (
-              <tr aria-hidden="true"><td colSpan={table.getAllLeafColumns().length} style={{height: bottomPad}}/></tr>
-            )}
+            {bottomPad>0 && (<tr aria-hidden="true"><td colSpan={table.getAllLeafColumns().length} style={{height: bottomPad}}/></tr>)}
             <tr>
               <td colSpan={table.getAllLeafColumns().length}>
                 <button className="btn" onClick={()=> addTestCase()}>+ {t2(data.idioma,'newTestCase')}</button>
@@ -310,6 +273,25 @@ export function CasesTableV2(){
           </div>
         </div>
       )}
+
+      {failFor && (
+        <div className="modal-backdrop" onClick={()=> { setFailFor(null); setFailText('') }}>
+          <div className="modal" onClick={e=> e.stopPropagation()} style={{maxWidth:520}}>
+            <div className="modal-header">
+              <h3 className="modal-title">{t2(data.idioma,'actual')}</h3>
+              <button className="modal-close" onClick={()=> { setFailFor(null); setFailText('') }} aria-label={t2(data.idioma,'close')}>x</button>
+            </div>
+            <div className="modal-body">
+              <input className="btn" placeholder={t2(data.idioma,'actual')} value={failText} onChange={e=> setFailText((e.target as any).value)} autoFocus />
+            </div>
+            <div className="modal-footer">
+              <button className="btn" onClick={()=> { setFailFor(null); setFailText('') }}>{t2(data.idioma,'cancel')}</button>
+              <button className="btn primary" disabled={!failText.trim()} onClick={()=> { if(failFor){ updateTestCase(failFor, { resultadoReal: failText.trim() }); setCaseStatus(failFor, 'Failed'); setFailFor(null); setFailText('') } }}>{t2(data.idioma,'confirm')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+

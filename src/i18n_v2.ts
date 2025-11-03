@@ -14,7 +14,17 @@ const dictV2: Record<LangV2, Record<string,string>> = {
     testType:'Tipo de Teste', automationReady:'Apto para automação', note:'Observação', noRequirements:'Sem requisitos',
     allStatus:'Todos os Status', optional:'opcional', cancel:'Cancelar', confirm:'Confirmar',
     reqTypeEpic:'Épico', reqTypeStory:'História', reqTypeTask:'Tarefa', reqTypeBug:'Bug', reqTypeOther:'Outro',
-    reqStatusDraft:'Rascunho', reqStatusInProgress:'Em progresso', reqStatusInReview:'Em revisão', reqStatusApproved:'Aprovado'
+    reqStatusDraft:'Rascunho', reqStatusInProgress:'Em progresso', reqStatusInReview:'Em revisão', reqStatusApproved:'Aprovado',
+    reports:'Relatórios', reportsTitle:'Relatórios', executedEN:'Executados', statusBySuite:'Status por Suite',
+    summaryTab:'Resumo', chartsTab:'Gráficos', groupsTab:'Agrupamentos', exportsTab:'Exportações',
+    timeline:'Linha do tempo', radar:'Radar comparativo', refresh:'Atualizar',
+    notExecuted:'Não Executado',
+    validationBlockedReason:'Informe o motivo do bloqueio.',
+    validationStatusExecuted:"Status só pode ser 'Passed' ou 'Failed' se o caso foi executado.",
+    validationRequired:'Preencha todos os campos obrigatórios antes de salvar.',
+    validationInvalidLink:'O link precisa começar com http:// ou https://.',
+    validationNoData:'Nenhum dado disponível para exportar.',
+    validationProjectDuplicate:'Já existe um projeto com esse nome.'
   },
   'es-ES': {
     project:'Proyecto', newProject:'Nuevo proyecto', add:'Agregar', requirements:'Requisitos', requirement:'Requisito', allRequirements:'Todos los Requisitos',
@@ -29,7 +39,17 @@ const dictV2: Record<LangV2, Record<string,string>> = {
     testType:'Tipo de Prueba', automationReady:'Apto para automatización', note:'Observación', noRequirements:'Sin requisitos',
     allStatus:'Todos los Estados', optional:'opcional', cancel:'Cancelar', confirm:'Confirmar',
     reqTypeEpic:'Épica', reqTypeStory:'Historia', reqTypeTask:'Tarea', reqTypeBug:'Bug', reqTypeOther:'Otro',
-    reqStatusDraft:'Borrador', reqStatusInProgress:'En progreso', reqStatusInReview:'En revisión', reqStatusApproved:'Aprobado'
+    reqStatusDraft:'Borrador', reqStatusInProgress:'En progreso', reqStatusInReview:'En revisión', reqStatusApproved:'Aprobado',
+    reports:'Informes', reportsTitle:'Informes', executedEN:'Ejecutados', statusBySuite:'Estado por Suite',
+    summaryTab:'Resumen', chartsTab:'Gráficos', groupsTab:'Agrupaciones', exportsTab:'Exportaciones',
+    timeline:'Línea de tiempo', radar:'Radar comparativo', refresh:'Actualizar',
+    notExecuted:'No Ejecutado',
+    validationBlockedReason:'Informe el motivo del bloqueo.',
+    validationStatusExecuted:"El estado solo puede ser 'Passed' o 'Failed' si el caso fue ejecutado.",
+    validationRequired:'Complete todos los campos obligatorios antes de guardar.',
+    validationInvalidLink:'El enlace debe comenzar con http:// o https://.',
+    validationNoData:'No hay datos disponibles para exportar.',
+    validationProjectDuplicate:'Ya existe un proyecto con ese nombre.'
   },
   'en-US': {
     project:'Project', newProject:'New project', add:'Add', requirements:'Requirements', requirement:'Requirement', allRequirements:'All Requirements',
@@ -44,11 +64,20 @@ const dictV2: Record<LangV2, Record<string,string>> = {
     testType:'Test Type', automationReady:'Automation Ready', note:'Note', noRequirements:'No requirements',
     allStatus:'All Status', optional:'optional', cancel:'Cancel', confirm:'Confirm',
     reqTypeEpic:'Epic', reqTypeStory:'Story', reqTypeTask:'Task', reqTypeBug:'Bug', reqTypeOther:'Other',
-    reqStatusDraft:'Draft', reqStatusInProgress:'In Progress', reqStatusInReview:'In Review', reqStatusApproved:'Approved'
+    reqStatusDraft:'Draft', reqStatusInProgress:'In Progress', reqStatusInReview:'In Review', reqStatusApproved:'Approved',
+    reports:'Reports', reportsTitle:'Reports', executedEN:'Executed', statusBySuite:'Status by Suite',
+    summaryTab:'Summary', chartsTab:'Charts', groupsTab:'Groupings', exportsTab:'Exports',
+    timeline:'Timeline', radar:'Radar', refresh:'Refresh',
+    notExecuted:'Not Executed',
+    validationBlockedReason:'Please provide the blocked reason.',
+    validationStatusExecuted:"Status can only be 'Passed' or 'Failed' if the case was executed.",
+    validationRequired:'Fill all required fields before saving.',
+    validationInvalidLink:'Link must start with http:// or https://.',
+    validationNoData:'No data available to export.',
+    validationProjectDuplicate:'A project with this name already exists.'
   }
 }
 
 export function t2(lang: LangV2, key: string){
   return dictV2[lang][key] ?? key
 }
-

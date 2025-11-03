@@ -5,6 +5,7 @@ import { SummaryCards } from './components/SummaryCards'
 import { CaseTable } from './components/CaseTable'
 import { ImportModal } from './components/ImportModal'
 import { Reports } from './pages/Reports'
+import { ReportsV2 } from './pages/ReportsV2'
 import { Filters } from './components/Filters'
 import { ProjectsBar } from './components/ProjectsBar'
 import { RequirementsBarV2 } from './components/RequirementsBarV2'
@@ -119,7 +120,7 @@ export function App(){
         </div>
       )}
       {showImport && <ImportModal onClose={()=> setShowImport(false)} />}
-      {showReports && <Reports onClose={()=> setShowReports(false)} />}
+      {showReports && (useV2 ? <ReportsV2 onClose={()=> setShowReports(false)} /> : <Reports onClose={()=> setShowReports(false)} />)}
     </div>
   )
 }
