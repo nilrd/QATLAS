@@ -16,6 +16,7 @@ export interface TestCaseV2 {
   descricao: string
   suite: string
   tipoTeste?: string
+  modo?: 'StepByStep' | 'Gherkin'
   resultadoEsperado: string
   resultadoReal?: string
   status: TestStatusV2

@@ -32,6 +32,7 @@ export function CasesTableV2(){
   const [selectedId, setSelectedId] = useState<string|null>(null)
   const [stepsFor, setStepsFor] = useState<string|null>(null)
   const [stepsText, setStepsText] = useState('')
+  const [stepList, setStepList] = useState<string[]>([])
   const [failFor, setFailFor] = useState<string|null>(null)
   const [failText, setFailText] = useState('')
 
@@ -117,6 +118,12 @@ export function CasesTableV2(){
       <input data-col={2} value={row.original.tipoTeste || ''} placeholder={t2(data.idioma,'testType')}
         onChange={e=> updateTestCase(row.original.id, { tipoTeste: (e.target as any).value })} />
     )},
+    { id:'mode', header: t2(data.idioma,'mode'), size: 160, cell: ({ row })=> (
+      <select value={(row.original as any).modo || 'StepByStep'} onChange={e=> updateTestCase(row.original.id, { modo: (e.target as any).value as any })}>
+        <option value="StepByStep">{t2(data.idioma,'stepByStep')}</option>
+        <option value="Gherkin">{t2(data.idioma,'gherkin')}</option>
+      </select>
+    )},
     { id:'req', header: t2(data.idioma,'requirement'), size: 220, cell: ({ row })=> (
       <select data-col={3} value={row.original.requirementId || ''}
         onChange={e=> updateTestCase(row.original.id, { requirementId: (e.target as any).value || undefined })}>
@@ -138,7 +145,15 @@ export function CasesTableV2(){
     { id:'steps', header: t2(data.idioma,'steps'), size: 160, cell: ({ row })=> (
       <div style={{display:'flex', alignItems:'center', gap:8}}>
         <span>{(row.original.steps?.length||0)}</span>
-        <button className="btn" onClick={()=> { setStepsFor(row.original.id); setStepsText((row.original.steps||[]).join('\n')) }}>{t2(data.idioma,'openSteps')}</button>
+        <button className="btn" onClick={()=> { 
+          setStepsFor(row.original.id);
+          const modo = (row.original as any).modo || 'StepByStep'
+          if(modo==='Gherkin'){
+            setStepsText((row.original.steps||[]).join('\n'))
+          }else{
+            setStepList([...(row.original.steps||[])])
+          }
+        }}>{t2(data.idioma,'openSteps')}</button>
       </div>
     )},
     { id:'status', header: t2(data.idioma,'status'), size: 180, cell: ({ row })=> (
@@ -257,19 +272,50 @@ export function CasesTableV2(){
               <h3 className="modal-title">{t2(data.idioma,'steps')}</h3>
               <button className="modal-close" onClick={()=> { setStepsFor(null); setStepsText('') }} aria-label={t2(data.idioma,'close')}>x</button>
             </div>
-            <div className="modal-body" style={{display:'grid', gap:8}}>
-              <div style={{display:'flex', gap:8}}>
-                <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'Given ')}>Given</button>
-                <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'When ')}>When</button>
-                <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'Then ')}>Then</button>
-                <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'And ')}>And</button>
-              </div>
-              <textarea className="btn" rows={10} style={{width:'100%'}} value={stepsText} onChange={e=> setStepsText((e.target as any).value)} placeholder={t2(data.idioma,'steps')} />
-            </div>
-            <div className="modal-footer">
-              <button className="btn" onClick={()=> { setStepsFor(null); setStepsText('') }}>{t2(data.idioma,'cancel')}</button>
-              <button className="btn primary" onClick={()=> { if(stepsFor!==null){ const arr = stepsText.split(/\r?\n/).map(s=> s.trim()).filter(Boolean); updateTestCase(stepsFor, { steps: arr }); setStepsFor(null); setStepsText('') } }}>{t2(data.idioma,'save')}</button>
-            </div>
+            {(() => {
+              const tc = cases.find(c=> c.id===stepsFor)
+              const modo = (tc as any)?.modo || 'StepByStep'
+              if(modo==='Gherkin'){
+                return (
+                  <>
+                    <div className="modal-body" style={{display:'grid', gap:8}}>
+                      <div style={{display:'flex', gap:8}}>
+                        <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'Given ')}>Given</button>
+                        <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'When ')}>When</button>
+                        <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'Then ')}>Then</button>
+                        <button className="btn" onClick={()=> setStepsText(s=> s + (s.endsWith('\n')||s===''? '':'\n') + 'And ')}>And</button>
+                      </div>
+                      <textarea className="btn" rows={10} style={{width:'100%'}} value={stepsText} onChange={e=> setStepsText((e.target as any).value)} placeholder={t2(data.idioma,'steps')} />
+                    </div>
+                    <div className="modal-footer">
+                      <button className="btn" onClick={()=> { setStepsFor(null); setStepsText('') }}>{t2(data.idioma,'cancel')}</button>
+                      <button className="btn primary" onClick={()=> { if(stepsFor!==null){ const arr = stepsText.split(/\r?\n/).map(s=> s.trim()).filter(Boolean); updateTestCase(stepsFor, { steps: arr }); setStepsFor(null); setStepsText('') } }}>{t2(data.idioma,'save')}</button>
+                    </div>
+                  </>
+                )
+              }
+              // StepByStep: lista editável com + e -
+              return (
+                <>
+                  <div className="modal-body" style={{display:'grid', gap:8}}>
+                    {stepList.map((s, idx)=> (
+                      <div key={idx} style={{display:'flex', gap:8, alignItems:'center'}}>
+                        <span style={{width:24, textAlign:'right'}}>{idx+1}.</span>
+                        <input className="btn" style={{flex:1}} value={s} onChange={e=> {
+                          const v = (e.target as any).value; const arr=[...stepList]; arr[idx]=v; setStepList(arr)
+                        }} placeholder={t2(data.idioma,'steps')+` ${idx+1}`} />
+                        <button className="btn" onClick={()=> setStepList(arr=> arr.filter((_,i)=> i!==idx))}>-</button>
+                      </div>
+                    ))}
+                    <button className="btn" onClick={()=> setStepList(arr=> [...arr, ''])}>+ {t2(data.idioma,'addStep')}</button>
+                  </div>
+                  <div className="modal-footer">
+                    <button className="btn" onClick={()=> { setStepsFor(null); setStepList([]) }}>{t2(data.idioma,'cancel')}</button>
+                    <button className="btn primary" onClick={()=> { if(stepsFor!==null){ const arr = stepList.map(s=> s.trim()).filter(Boolean); updateTestCase(stepsFor, { steps: arr }); setStepsFor(null); setStepList([]) } }}>{t2(data.idioma,'save')}</button>
+                  </div>
+                </>
+              )
+            })()}
           </div>
         </div>
       )}
